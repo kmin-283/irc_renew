@@ -1,32 +1,44 @@
 #ifndef LOCALSERVER_HPP
 #define LOCALSERVER_HPP
 
-#include "utils.hpp"
+#include "Command.hpp"
+
 
 class LocalServer
 {
 private:
-    const std::string pass;
-    const std::string port;
-    const std::string tlsPort;
+    bool run;
+    bool mSSLClient;
 
-    int normalSocket;
-    int tlsSocket;
-    int maxSocket;
+    const std::string mPass;
+    const std::string mPort;
+    const std::string mTlsPort;
+    const std::string mServerName;
+    const std::string mInfo;
 
-    fd_set readSockets;
+    int mNormalSocket;
+    int mTlsSocket;
+    int mMaxSocket;
 
-    void renewSocket(const int &socket);
+    std::set<int> mDirectClient;
+
+    fd_set mReadSockets;
+
+    Command executer;
+
+    void mRenewSocket(const int &socket);
+    /*
+     * localServerConnection.cpp
+     */
+    int mAcceptClient(const int &socket);
+    int mReceiveMessage(const int &socket);
 public:
     LocalServer(const char *password, const char *port);
     ~LocalServer();
 
-    int init(const char *hostname, const char *port);
-    int connectRemoteServer(const char *port);
-    int start();
-
+    int init(const char *port);
+    int connectRemoteServer(const char *RemoteServerInfo);
+    int start(void);
 };
-
-
 
 #endif

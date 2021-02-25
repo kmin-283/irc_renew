@@ -1,22 +1,16 @@
 #ifndef USER_HPP
 #define USER_HPP
 #include "IClient.hpp"
-class User : public IClient
+#include "Message.hpp"
+
+class User: public IClient
 {
 private:
     /* data */
 public:
     User(/* args */);
-    ~User();
+    virtual std::string &getInfo(const int &idx);
+    virtual ~User();
 };
-
-User::User(/* args */)
-{
-}
-
-User::~User()
-{
-}
-
 
 #endif

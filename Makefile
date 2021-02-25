@@ -1,12 +1,13 @@
 CC = clang++
-CFLAGS = -g3 -fsanitize=address -Wall -Werror -Wextra
+CFLAGS = -g3 -fsanitize=address
 NAME = ircserv
 INCLUDE = -I ./include/
 
 # SSL = -L /usr/local/Cellar/openssl@1.1/1.1.1i/lib -lssl -lcrypto
 # SSLI = -I/usr/local/Cellar/openssl@1.1/1.1.1i/include/openssl/
 
-SRC = main.cpp utils.cpp localServer.cpp localServerInit.cpp
+SRC = main.cpp utils.cpp localServerInit.cpp localServerConn.cpp RemoteServer.cpp User.cpp Message.cpp Transmit.cpp \
+CommandInit.cpp command.cpp
 SRC_DIR = ./src/
 SRCS = $(addprefix $(SRC_DIR), $(SRC))
 OBJS = $(SRCS:%.cpp=%.o)
@@ -34,9 +35,8 @@ $(NAME) : $(OBJS)
 .cpp.o:
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
-test:
-	cd ./tests; make re
-	./tests/test
+debug:
+	$(CC) $(CFLASG) $(INCLUDE) -D DEBUG=1 $(SRCS) -o $(NAME)
 
 clean:
 	rm -rf $(OBJS) $(OBJS_COM) $(OBJS_RE)

@@ -1,22 +1,16 @@
 #ifndef REMOTE_SERVER_HPP
 #define REMOTE_SERVER_HPP
 #include "IClient.hpp"
+#include "Message.hpp"
 
 class RemoteServer: public IClient
 {
 private:
-    /* data */
+    std::string mServerName;
 public:
-    RemoteServer(/* args */);
-    ~RemoteServer();
+    RemoteServer(const int &sock);
+    virtual std::string &getInfo(const int &idx);
+    virtual ~RemoteServer();
 };
-
-RemoteServer::RemoteServer(/* args */)
-{
-}
-
-RemoteServer::~RemoteServer()
-{
-}
 
 #endif

@@ -2,9 +2,8 @@
 
 int main(int argc, char *argv[])
 {
-    char    *hostname;
     LocalServer *localServer;
-    const int networkIndex = 1;
+    const int remoteServerIndex = 1;
     const int portIndex = argc - 2;
     const int passIndex = argc - 1;
 
@@ -17,11 +16,11 @@ int main(int argc, char *argv[])
     else 
     {
         localServer = new LocalServer(argv[passIndex], argv[portIndex]);
-        // if (localServer->init(hostname, argv[portIndex]) != SUCCESS)
-            // return (FAIL);
-        // if (argc == 4)
-        //     localServer->connectRemoteServer(argv[networkIndex]);
-        // localServer->start();
+        if (localServer->init(argv[portIndex]) != SUCCESS)
+            return (FAIL);
+        if (argc == 4)
+            localServer->connectRemoteServer(argv[remoteServerIndex]);
+        localServer->start();
         delete localServer;
     }
     return (0);
