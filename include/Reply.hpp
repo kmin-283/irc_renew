@@ -1,21 +1,17 @@
 #ifndef REPLY_HPP
 #define REPLY_HPP
 
+#include "Message.hpp"
+
 class Reply
 {
 private:
-    /* data */
+    int searchReply(const Message *msg);
+
 public:
-    Reply(/* args */);
+    Reply();
     ~Reply();
+    int runReply(const Message *msg);
 };
-
-Reply::Reply(/* args */)
-{
-}
-
-Reply::~Reply()
-{
-}
 
 #endif

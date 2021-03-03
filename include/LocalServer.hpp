@@ -1,8 +1,7 @@
 #ifndef LOCALSERVER_HPP
 #define LOCALSERVER_HPP
 
-#include "Command.hpp"
-
+#include "Executer.hpp"
 
 class LocalServer
 {
@@ -22,9 +21,10 @@ private:
 
     std::set<int> mDirectClient;
 
+
     fd_set mReadSockets;
 
-    Command executer;
+    Executer executer;
 
     void mRenewSocket(const int &socket);
     /*
@@ -32,6 +32,14 @@ private:
      */
     int mAcceptClient(const int &socket);
     int mReceiveMessage(const int &socket);
+    int mDisconnClient(const int &socket);
+
+    // int mIsLocalCmd(const Message *msg, const int &socket);
+    // int irc_pass(const Message *msg, const int &socket);
+    // int irc_nick();
+    // int irc_user();
+    // int irc_server();
+    // pass, nick, user, server -- > for connection
 public:
     LocalServer(const char *password, const char *port);
     ~LocalServer();

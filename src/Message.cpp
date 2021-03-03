@@ -1,5 +1,17 @@
 #include "Message.hpp"
 
+Message::Message()
+{}
+
+Message::Message(const std::string &err)
+	: mPrefix(""), mCommand(err)
+{
+	std::string tmpParameters = CR_LF;
+
+	this->setTotalMessage(mPrefix, mCommand, tmpParameters);
+	this->mSize = this->mTotalMessage.length();
+}
+
 Message::Message(const std::string &prefix, const std::string &command, const std::string &parameters)
 	: mPrefix(prefix), mCommand(command)
 {
@@ -11,28 +23,13 @@ Message::Message(const std::string &prefix, const std::string &command, const st
 	tmpParameters = parameters;
 	tmpParameters += CR_LF;
 	iterator = tmpParameters.begin();
-	this->setTotalMessage(prefix, mCommand, parameters);
+	this->setTotalMessage(prefix, mCommand, tmpParameters);
 	this->setParameters(iterator, tmpParameters);
 	this->mSize = this->mTotalMessage.length();
 }
 
 Message::~Message()
-{
-}
-
-std::string Message::getParameterStr(std::string::const_iterator iterator, const std::string &message)
-{
-	std::string returnStr;
-
-	returnStr = std::string("");
-	for (; iterator != message.end(); ++iterator)
-	{
-		if (*iterator == '\r' || *iterator == '\n')
-			break;
-		returnStr += *iterator;
-	}
-	return (returnStr);
-}
+{}
 
 void Message::skipSpace(std::string::const_iterator &iterator, const std::string &message)
 {
@@ -42,15 +39,13 @@ void Message::skipSpace(std::string::const_iterator &iterator, const std::string
 
 void Message::setTotalMessage(const std::string &prefix, const std::string &command, const std::string &parameters)
 {
-	mTotalMessage = "";
-	mTotalMessage += prefix;
+	mTotalMessage = prefix;
 	if (prefix != "")
 		mTotalMessage += " ";
 	mTotalMessage += command;
 	if (parameters != "")
 		mTotalMessage += " ";
 	mTotalMessage += parameters;
-	mTotalMessage += CR_LF;
 }
 
 void Message::setString(std::string &target, std::string::const_iterator &iterator, const std::string &message)

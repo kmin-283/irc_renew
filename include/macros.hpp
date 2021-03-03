@@ -10,11 +10,16 @@
 /*
  * connection
  */
-#define CONN 1
-#define DISCONN 0
-
+#define CONN 0
+#define DISCONN -1
+#define ERASE_SERVER -2
+/*
+ * etc
+ */
 #define SUCCESS 0
 #define FAIL -1
+#define NOT_FOUND -3
+#define ERR_REPLY 400
 /*
  * message
  */
@@ -100,4 +105,10 @@ enum CMD
     // USERHOST,
     // ISON,
 };
+
+/*
+ * replies
+ */
+#define ERR_NEEDMOREPARAM "461"
+#define ERR_ALREADYREGISTRED "462"
 #endif

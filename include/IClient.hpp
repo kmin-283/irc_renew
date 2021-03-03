@@ -1,6 +1,7 @@
 #ifndef ICLIENT_HPP
 #define ICLIENT_HPP
 
+#include "utils.hpp"
 #include <string>
 
 class IClient

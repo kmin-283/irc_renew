@@ -1,12 +1,10 @@
 #include "User.hpp"
 
 User::User(/* args */)
-{
-}
+{}
 
 User::~User()
-{
-}
+{}
 
 std::string &User::getInfo(const int &idx)
 {

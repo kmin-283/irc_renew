@@ -1,47 +1,31 @@
 #include "Command.hpp"
 
-constexpr unsigned long djb2_hash_impl(const char* text, unsigned long prev_hash)
-{
-    return text[0] == '\0' ? prev_hash : djb2_hash_impl( &text[1], prev_hash * 33 ^ static_cast<unsigned long>(text[0]) );
-}
- 
-constexpr unsigned long djb2_hash(const char* text)
-{
-    return djb2_hash_impl( text, 5381 );
-}
-
-Command::Command(/* args */)
+Command::Command()
 {
 }
 
 Command::~Command()
-{
-}
+{}
 
-int  Command::searchCmd(const Message &msg)
+int Command::mSearchCmd(const Message *msg, const bool &isAlreadyRegistered)
 {
-    switch (djb2_hash(msg.getCommand().c_str()))
+    switch (djb2_hash(msg->getCommand().c_str()))
     {
     case djb2_hash("PASS"):
-        return irc_pass(msg);
+        return irc_pass(msg, isAlreadyRegistered);
     case djb2_hash("NICK"):
-        return(CONNECT);
+        return(CONN);
 
     case djb2_hash("USER"):
-        return(CONNECT);
+        return(CONN);
 
     case djb2_hash("OPER"):
-        return(CONNECT);
+        return(CONN);
+
+    // case djb2_hash(something reply):
+    //     return (CONN);
 
     default:
-        return(CONNECT);
+        return(NOT_FOUND);
     }
-}
-
-int Command::runCmd(const Message &msg)
-{
-    int ret;
-
-    ret = searchCmd(msg);
-    return (ret);
 }
