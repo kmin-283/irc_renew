@@ -2,11 +2,13 @@
 
 Executer::Executer()
 {
+    mInitFromConf();
     mIsRegistered.assign(10, false);
 }
 
 Executer::~Executer()
 {}
+
 
 int Executer::executing(const Message *msg, const int &socket)
 {
@@ -25,4 +27,21 @@ int Executer::executing(const Message *msg, const int &socket)
     // else
     //     mSendMsg();
     return (res);
+}
+
+int Executer::setPass(const char *passwd)
+{
+    var.global.mPass = std::string(passwd);
+    return (SUCCESS);
+}
+
+int Executer::setPort(const char *port)
+{
+    var.global.mPort = std::string(port);
+    return (SUCCESS);
+}
+
+const char *Executer::getPort() const
+{
+    return (var.global.mPort.c_str());
 }

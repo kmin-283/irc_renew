@@ -9,19 +9,18 @@ int main(int argc, char *argv[])
 
     if (argc > 4)
         return printError("There are too many arguments in function: main() | file: main.cpp", RED);
-    else if (argc < 3)
-        return printError("There are too few arguments in function: main() | file: main.cpp", RED);
-    else if (!isValidPort(std::string(argv[portIndex])))
+    if (argc == 2)
+        return printError("command  in function: main() | file: main.cpp", RED);
+    if (argc != 1 && !isValidPort(std::string(argv[portIndex])))
         return printError("Port must be numeric in function: main() | file: main.cpp", RED);
-    else 
-    {
-        localServer = new LocalServer(argv[passIndex], argv[portIndex]);
-        if (localServer->init(argv[portIndex]) != SUCCESS)
-            return (FAIL);
-        if (argc == 4)
-            localServer->connectRemoteServer(argv[remoteServerIndex]);
-        localServer->start();
-        delete localServer;
-    }
+    localServer = new LocalServer();
+    if (argc != 1)
+        localServer->setPassAndPort(argv[passIndex], argv[portIndex]);
+    if (localServer->init() != SUCCESS)
+        return (FAIL);
+    if (argc == 4)
+        localServer->connectRemoteServer(argv[remoteServerIndex]);
+    localServer->start();
+    delete localServer;
     return (0);
 }

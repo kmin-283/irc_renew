@@ -1,8 +1,8 @@
 #ifndef REMOTE_SERVER_HPP
 #define REMOTE_SERVER_HPP
 
-#include "Channel.hpp"
 #include "IClient.hpp"
+#include "Channel.hpp"
 
 class RemoteServer: public IClient
 {

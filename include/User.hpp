@@ -1,8 +1,8 @@
 #ifndef USER_HPP
 #define USER_HPP
 
-#include "Channel.hpp"
 #include "IClient.hpp"
+#include "Channel.hpp"
 
 class User: public IClient
 {

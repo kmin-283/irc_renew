@@ -9,12 +9,6 @@ private:
     bool run;
     bool mSSLClient;
 
-    const std::string mPass;
-    const std::string mPort;
-    const std::string mTlsPort;
-    const std::string mServerName;
-    const std::string mInfo;
-
     int mNormalSocket;
     int mTlsSocket;
     int mMaxSocket;
@@ -33,18 +27,12 @@ private:
     int mAcceptClient(const int &socket);
     int mReceiveMessage(const int &socket);
     int mDisconnClient(const int &socket);
-
-    // int mIsLocalCmd(const Message *msg, const int &socket);
-    // int irc_pass(const Message *msg, const int &socket);
-    // int irc_nick();
-    // int irc_user();
-    // int irc_server();
-    // pass, nick, user, server -- > for connection
 public:
-    LocalServer(const char *password, const char *port);
+    LocalServer();
     ~LocalServer();
 
-    int init(const char *port);
+    int init();
+    int setPassAndPort(const char *password, const char *port);
     int connectRemoteServer(const char *RemoteServerInfo);
     int start(void);
 };

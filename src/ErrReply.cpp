@@ -38,4 +38,5 @@ int ErrReply::runErrReply(const Message *msg, const int &numericReply)
     default:
         break;
     }
+    return (CONN);
 }

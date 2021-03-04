@@ -6,8 +6,8 @@ INCLUDE = -I ./include/
 # SSL = -L /usr/local/Cellar/openssl@1.1/1.1.1i/lib -lssl -lcrypto
 # SSLI = -I/usr/local/Cellar/openssl@1.1/1.1.1i/include/openssl/
 
-SRC = main.cpp utils.cpp localServerInit.cpp localServerConn.cpp RemoteServer.cpp User.cpp Message.cpp \
-CommandInit.cpp Command.cpp ReplyInit.cpp Reply.cpp ErrReply.cpp Executer.cpp Channel.cpp
+SRC = main.cpp utils.cpp LocalServerInit.cpp LocalServerConn.cpp Executer.cpp ExecuterInit.cpp RemoteServer.cpp Channel.cpp User.cpp Message.cpp \
+CommandInit.cpp Command.cpp ReplyInit.cpp Reply.cpp ErrReply.cpp Variables.cpp
 SRC_DIR = ./src/
 SRCS = $(addprefix $(SRC_DIR), $(SRC))
 OBJS = $(SRCS:%.cpp=%.o)

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <vector>
 
+#include <cstdio>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -23,8 +24,8 @@
 
 // #include <openssl/ssl.h>
 // #include <openssl/err.h>
-
-#include "string.h"
+#include <cstring>
+#include <string.h>
 
 #include "macros.hpp"
 

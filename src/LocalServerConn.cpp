@@ -8,7 +8,7 @@ static struct addrinfo *getAddress(const std::string &info)
     std::string     remoteAddress;
 	struct addrinfo	hints;
 	struct addrinfo	*addrInfo;
-
+    
 	// TODO address가 제대로 들어왔는지 체크하는 함수필요 할 수 있음
 	i = info.rfind(":");
 	j = info.rfind(":", i - 1);
@@ -70,9 +70,11 @@ int LocalServer::connectRemoteServer(const char *remoteServerInfo)
 
     /* sendLocalInfo();*/
     
-    std::string remotePass = remoteServInfo.substr(remoteServInfo.rfind(":") + 1);
-    Message mPassMessage("", "PASS", remotePass);
-    Message serverMessage("", "SERVER", mServerName + " 1 " + mInfo);
+    /* executer안에서 함수를 생성하여 만들어주어야 함.*/
+
+    // std::string remotePass = remoteServInfo.substr(remoteServInfo.rfind(":") + 1);
+    // Message mPassMessage("", "PASS", remotePass);
+    // Message serverMessage("", "SERVER", executer.var.global.mName + " 1 " + executer.var.global.mInfo);
 
     // sender.sendMsg(mPassMessage, static_cast<RemoteServer*>(remoteServer));
     

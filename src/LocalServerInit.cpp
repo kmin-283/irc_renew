@@ -1,16 +1,20 @@
 #include "LocalServer.hpp"
 
-LocalServer::LocalServer(const char *mPassword, const char *mPort)
-    : run(true), mPass(std::string(mPassword)), mPort(std::string(mPort))
-    , mServerName(std::string("irc.server.renew")), mInfo("tmpInfo")
-    , mMaxSocket(0)
-{
-}
+LocalServer::LocalServer()
+	: run(true), mMaxSocket(0)
+{}
 
 LocalServer::~LocalServer()
 {
     mDirectClient.clear();
     printColorized("Good Bye!", GREEN);
+}
+
+int LocalServer::setPassAndPort(const char *password, const char *port)
+{
+	executer.setPass(password);
+	executer.setPort(port);
+	return (SUCCESS);
 }
 
 void LocalServer::mRenewSocket(const int &socket)
@@ -20,8 +24,9 @@ void LocalServer::mRenewSocket(const int &socket)
         mMaxSocket = socket;
 }
 
-int LocalServer::init(const char *mPort)
+int LocalServer::init()
 {
+	const char *port = executer.getPort();
     int localSock;
     int flag = 1;
     struct addrinfo hints;
@@ -44,12 +49,11 @@ int LocalServer::init(const char *mPort)
     // 		exit(0);
     // 	LoadCertificates(this->ctx, CertFile, KeyFile, true);
     // }
-
     memset(&hints, 0x00, sizeof(struct addrinfo));
     hints.ai_flags = AI_PASSIVE;
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    if (getaddrinfo(NULL, mPort, &hints, &addrInfo) == FAIL) // localServer 127.0.0.1
+    if (getaddrinfo(NULL, port, &hints, &addrInfo) == FAIL) // localServer 127.0.0.1
     {
         freeaddrinfo(addrInfo);
         return printError("getaddrinfo() error in function: init() | file: localServerInit.cpp", RED);
@@ -72,11 +76,11 @@ int LocalServer::init(const char *mPort)
         }
     }
     mRenewSocket(localSock);
-    if (std::string(mPort) != mTlsPort)
-    {
+    // if (std::string(port) != executer.var.ssl.mPort)
+    // {
         mNormalSocket = localSock;
-    //     init(mTlsPort.c_str());
-    }
+    //     init(executer.var.ssl.mPort.c_str());
+    // }
     // else
         // mTlsSocket = localSock+1;
     freeaddrinfo(addrInfo);
@@ -162,4 +166,5 @@ int LocalServer::start(void)
 		}
 	}
 	// SSL_CTX_free(this->ctx);
+	return (SUCCESS);
 }
