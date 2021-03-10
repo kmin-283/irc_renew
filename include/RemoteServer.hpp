@@ -9,7 +9,7 @@ class RemoteServer: public IClient
 private:
     std::string mServerName;
 public:
-    RemoteServer(const int &sock);
+    RemoteServer(const int &clientId);
     virtual std::string &getInfo(const int &idx);
     virtual ~RemoteServer();
 };

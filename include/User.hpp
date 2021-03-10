@@ -7,10 +7,10 @@
 class User: public IClient
 {
 private:
-    /* data */
 public:
-    User(/* args */);
-    virtual std::string &getInfo(const int &idx);
+    User(const int &clientId);
+    User(const IClient *otherUser);
+    virtual const std::string &getInfo(const int &idx) const;
     virtual ~User();
 };
 

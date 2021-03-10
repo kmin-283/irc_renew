@@ -1,6 +1,5 @@
 #include "Executer.hpp"
 
-
 template<typename _Category>
 int Executer::mSetCategory(_Category &category, std::ifstream &f)
 {
@@ -15,7 +14,7 @@ int Executer::mSetCategory(_Category &category, std::ifstream &f)
     }
     if (buf[0] == '[')
     {
-        int len = strlen(buf);
+        int len = strlen(buf) + 1;
         long pos = f.tellg();
         f.seekg(pos - len);
     }
@@ -29,10 +28,15 @@ int Executer::mSearchCategory(std::ifstream &f, const char *category)
     case djb2_hash("[Global]"):
         mSetCategory(var.global, f);
         break;
+    case djb2_hash("[SSL]"):
+        mSetCategory(var.ssl, f);
+        break;
     case djb2_hash("[Server]"):
         mSetCategory(var.servers[var.serversIdx], f);
         ++var.serversIdx;
         break;
+    case djb2_hash("[Limits]"):
+        mSetCategory(var.limits, f);
     default:
         break;
     }

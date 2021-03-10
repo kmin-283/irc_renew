@@ -102,24 +102,16 @@ int LocalServer::mAcceptClient(const int &socket)
 		return (printError("Can't accept client in function mAcceptClient | file: LocalServerConn.cpp", RED));
 	fcntl(newSock, F_SETFL, O_NONBLOCK);
 	mRenewSocket(newSock);
-
-	
     mDirectClient.insert(newSock);
-	// if (socket == this->mTlsSocket)
-	// {
-	// 	this->ssl = SSL_new(this->ctx);
-	// 	SSL_set_fd(this->ssl, newSock);
-	// 	if (SSL_accept(this->ssl) == -1)     /* do SSL-protocol accept */
-	// 		ERR_print_errors_fp(stderr);
-	// 	this->sslFd = newSock;
-	// }
+    if (socket == mTlsSocket)
+	{
+		mSsl = SSL_new(ctx);
+		SSL_set_fd(mSsl, newSock);
+		if (SSL_accept(mSsl) == -1)     /* do SSL-protocol accept */
+			ERR_print_errors_fp(stderr);
+        mSSLSocket.insert(newSock);
+	}
 	return (printColorized("Someone has connected!", GREEN));
-}
-
-int LocalServer::mDisconnClient(const int &socket)
-{
-    mDirectClient.erase(socket);
-    return (DISCONN);
 }
 
 static int transCharToMsg(std::string target, std::vector<int> &dst, const char *msg)
@@ -139,13 +131,11 @@ static int transCharToMsg(std::string target, std::vector<int> &dst, const char 
         return (SUCCESS);
     target = target.substr(idx+1);
     idx = target.find(' ');
-    if (idx == std::string::npos)// prefix o and param x || prefix x and param o
+    // prefix o and param x || prefix x and param o
+    if (!hasPrefix) // command + parameter
     {
-        if (!hasPrefix) // command + parameter
-        {
-            dst[1] = dst[0];
-            dst[0] = 0;
-        }
+        dst[1] = dst[0];
+        dst[0] = 0;
         return (SUCCESS);
     }
     dst[1] = dst[0] + idx;
@@ -156,45 +146,61 @@ int LocalServer::mReceiveMessage(const int &socket)
 {
     std::vector<int> idx(2, 0);
     char		buffer[513];
+    char        *tmp;
 	int			readResult = 0;
     int         res;
 	int			connectionStatus = CONNECT;
 
-    // if (mSSLClient)
-        // readResult = SSL_read();
-    // else
     memset(buffer, 0x00, sizeof(buffer));
-    readResult = recv(socket, buffer, sizeof(buffer), 0);
-    if (readResult < 0)
-        return printError("Can't receive message in function mReceiveMessage | file : localServerConn.cpp", RED);
-    // if (readResult == 0)
-    //     return (mDisconnClient());
-    
-    std::string info(buffer);
-    info = info.substr(0, info.length() - 1);
-    transCharToMsg(info, idx, buffer);
-    Message *recvMsg;
-
-    if (idx[0] == std::string::npos)
-        recvMsg = new Message("", info, "");
-    else if (idx[0] == 0)
-        recvMsg = new Message("", info.substr(0, idx[1]), info.substr(idx[1]+1));
+    if (mSSLClient)
+        readResult = SSL_read(mSsl, buffer, sizeof(buffer));
     else
-        recvMsg = new Message(info.substr(0, idx[0]), info.substr(idx[0]+1, idx[1] - idx[0]), info.substr(idx[1]+2));
-    if (DEBUG)
+        readResult = recv(socket, buffer, sizeof(buffer), 0);
+    std::cout << "Received message : " << buffer << std::endl;
+    if (readResult == 0)
+        return (mDisconnClient(socket));
+    // if (readResult < 0)
+    //     return printError("Can't receive message in function mReceiveMessage | file : localServerConn.cpp", RED);
+    tmp = strtok(buffer, CR_LF);
+    while (tmp)
     {
-        if (!recvMsg->getPrefix().empty())
-            std::cout <<"prefix " <<recvMsg->getPrefix() << std::endl;
-        if (!recvMsg->getCommand().empty())
-            std::cout<<"command " << recvMsg->getCommand() << std::endl;
-        if (recvMsg->getParameters().size() > 0)
-            std::cout <<"param "<< recvMsg->getParameter(0) << std::endl;
+        std::string info(tmp);
+        info = info.substr(0, info.length());
+        transCharToMsg(info, idx, tmp);
+        Message *recvMsg;
+
+        if (idx[0] == std::string::npos)
+            recvMsg = new Message("", info, "");
+        else if (idx[0] == 0)
+            recvMsg = new Message("", info.substr(0, idx[1]), info.substr(idx[1] + 1));
+        else
+            recvMsg = new Message(info.substr(0, idx[0]), info.substr(idx[0] + 1, idx[1] - idx[0]), info.substr(idx[1] + 2));
+        if (DEBUG)
+        {
+            if (!recvMsg->getPrefix().empty())
+                std::cout << "prefix " << recvMsg->getPrefix() << std::endl;
+            if (!recvMsg->getCommand().empty())
+                std::cout << "command " << recvMsg->getCommand() << std::endl;
+            if (recvMsg->getParameters().size() > 0)
+                std::cout << "param " << recvMsg->getParameter(0) << std::endl;
+        }
+        res = executer.executing(recvMsg, socket);
+        delete recvMsg;
+        recvMsg = nullptr;
+        tmp = strtok(nullptr, CR_LF);
     }
-    res = executer.executing(recvMsg, socket);
-    delete recvMsg;
     if (res == DISCONN)
         return (mDisconnClient(socket));
     // if (ret == ERASE_SERVER)
     //     return (mClearServer());
     return (CONN);
+}
+
+int LocalServer::mDisconnClient(const int &socket)
+{
+    // executer.eraseClient(socket); // mIsRegistered에 있는 데이터, mDirect에 있는 데이터 삭제.
+    if (mSSLClient)
+        mSSLSocket.erase(socket);
+    mDirectClient.erase(socket);
+    return (SUCCESS);
 }

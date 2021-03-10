@@ -2,6 +2,7 @@
 
 int main(int argc, char *argv[])
 {
+    bool TlsTurn = false;
     LocalServer *localServer;
     const int remoteServerIndex = 1;
     const int portIndex = argc - 2;
@@ -16,7 +17,7 @@ int main(int argc, char *argv[])
     localServer = new LocalServer();
     if (argc != 1)
         localServer->setPassAndPort(argv[passIndex], argv[portIndex]);
-    if (localServer->init() != SUCCESS)
+    if (localServer->init(TlsTurn) != SUCCESS)
         return (FAIL);
     if (argc == 4)
         localServer->connectRemoteServer(argv[remoteServerIndex]);

@@ -15,11 +15,15 @@ private:
 
     std::set<int> mDirectClient;
 
+    SSL_CTX *ctx;
+    SSL *mSsl;
+    std::set<int> mSSLSocket;
 
     fd_set mReadSockets;
 
     Executer executer;
-
+    
+    int mTlsInit();
     void mRenewSocket(const int &socket);
     /*
      * localServerConnection.cpp
@@ -31,7 +35,7 @@ public:
     LocalServer();
     ~LocalServer();
 
-    int init();
+    int init(const bool tlsTurn);
     int setPassAndPort(const char *password, const char *port);
     int connectRemoteServer(const char *RemoteServerInfo);
     int start(void);

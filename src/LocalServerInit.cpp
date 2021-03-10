@@ -24,31 +24,84 @@ void LocalServer::mRenewSocket(const int &socket)
         mMaxSocket = socket;
 }
 
-int LocalServer::init()
+static SSL_CTX	*InitCTX()
 {
-	const char *port = executer.getPort();
+	const SSL_METHOD *method;
+	SSL_CTX *ctx;
+
+	OpenSSL_add_all_algorithms();  /* load & register all cryptos, etc. */
+	SSL_load_error_strings();   /* load all error messages */
+	method = SSLv23_method();  /* create new server-method instance */
+	ctx = SSL_CTX_new(method);   /* create new context from method */
+	if ( ctx == NULL ) {
+		ERR_print_errors_fp(stderr);
+	}
+	return ctx;
+}
+
+static void LoadCertificates(SSL_CTX *ctx, const char* CertFile, const char* KeyFile, bool serv)
+{
+	if (serv) {
+		//New lines
+		if (SSL_CTX_load_verify_locations(ctx, CertFile, KeyFile) != 1)
+			ERR_print_errors_fp(stderr);
+
+		if (SSL_CTX_set_default_verify_paths(ctx) != 1)
+			ERR_print_errors_fp(stderr);
+		//End new lines
+	}
+	/* set the local certificate from CertFile */
+	if (SSL_CTX_use_certificate_file(ctx, CertFile, SSL_FILETYPE_PEM) <= 0)
+	{
+		ERR_print_errors_fp(stderr);
+		abort();
+	}
+	/* set the private key from KeyFile (may be the same as CertFile) */
+	if (SSL_CTX_use_PrivateKey_file(ctx, KeyFile, SSL_FILETYPE_PEM) <= 0)
+	{
+		ERR_print_errors_fp(stderr);
+		abort();
+	}
+	/* verify private key */
+	if (!SSL_CTX_check_private_key(ctx))
+	{
+		ERR_print_errors_fp(stderr);
+		abort();
+	}
+}
+
+int LocalServer::mTlsInit()
+{
+	SSL_library_init();
+
+	ctx = InitCTX();
+	if (ctx == NULL)
+		exit(0);
+	LoadCertificates(ctx, executer.getCert(), executer.getKey(), true);
+	return (SUCCESS);
+}
+
+int LocalServer::init(const bool tlsTurn)
+{
+	const char *port;
     int localSock;
     int flag = 1;
     struct addrinfo hints;
     struct addrinfo *addrInfo;
     struct addrinfo *addrInfoIter;
 
+	if (tlsTurn)
+		port = executer.getTlsPort().c_str();
+	else
+		port = executer.getPort();
     /*
 	 * TLS SETTING
 	 */
-    // if (std::string(mPort) == mTlsPort) {
-    // 	std::cout << "tls setting start..." << mPort << std::endl;
-    // 	char CertFile[] = "ft_irc.pem";
-    // 	char KeyFile[] = "ft_irc_key.pem";
-
-    // 	SSL_library_init();
-    // 	SSL_load_error_strings();
-
-    // 	this->ctx = InitCTX();
-    // 	if (this->ctx == NULL)
-    // 		exit(0);
-    // 	LoadCertificates(this->ctx, CertFile, KeyFile, true);
-    // }
+	if (std::string(port) == executer.getTlsPort())
+	{
+		mTlsInit();
+		printColorized("Tls Initializing ...", GREEN);
+	}
     memset(&hints, 0x00, sizeof(struct addrinfo));
     hints.ai_flags = AI_PASSIVE;
     hints.ai_family = AF_UNSPEC;
@@ -76,13 +129,13 @@ int LocalServer::init()
         }
     }
     mRenewSocket(localSock);
-    // if (std::string(port) != executer.var.ssl.mPort)
-    // {
+    if (std::string(port) != executer.getTlsPort())
+    {
         mNormalSocket = localSock;
-    //     init(executer.var.ssl.mPort.c_str());
-    // }
-    // else
-        // mTlsSocket = localSock+1;
+        init(true);
+    }
+    else
+        mTlsSocket = localSock;
     freeaddrinfo(addrInfo);
     return (SUCCESS);
 }
@@ -98,7 +151,7 @@ int LocalServer::start(void)
 	while(run)
 	{
 		FD_SET(this->mNormalSocket, &mReadSockets);
-		// FD_SET(this->mTlsSocket, &mReadSockets);
+		FD_SET(this->mTlsSocket, &mReadSockets);
 		curr = mDirectClient.begin();
 		next = mDirectClient.begin();
 		if (!mDirectClient.empty())
@@ -146,9 +199,9 @@ int LocalServer::start(void)
 					mAcceptClient(listenFd);
 				else
 				{
-                    // SSLClient = false;
-                    // if (isSSLSocket(listenFd))
-                        // mSSLClient = true;
+                    mSSLClient = false;
+                    if (mSSLSocket.count(listenFd))
+                        mSSLClient = true;
 					mReceiveMessage(listenFd);
 				}
 			}
@@ -165,6 +218,6 @@ int LocalServer::start(void)
 			}
 		}
 	}
-	// SSL_CTX_free(this->ctx);
+	SSL_CTX_free(ctx);
 	return (SUCCESS);
 }

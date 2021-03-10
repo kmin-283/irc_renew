@@ -1,15 +1,33 @@
 #include "Variables.hpp"
 
 Variables::Variables()
-    :serversIdx(0)
+    :serversIdx(0), mIsBroadcast(false)
 {
     servers.assign(10, vServer());
+    mIsRegistered.assign(10, 0);
 }
 
 Variables::~Variables()
-{}
+{
+    mClearClient();
+}
 
-static int setValue(std::string &val, char *tmp)
+void Variables::mClearClient()
+{
+    for(auto it = mDirectUser.begin(); it != mDirectUser.end(); ++it)
+        delete it->second;
+
+    for(auto it = mDirectServ.begin(); it != mDirectServ.end(); ++it)
+        delete it->second;
+
+    for(auto it = mRemoteUser.begin(); it != mRemoteUser.end(); ++it)
+        delete it->second;
+
+    for(auto it = mRemoteServ.begin(); it != mRemoteServ.end(); ++it)
+        delete it->second;
+}
+
+static void setValue(std::string &val, char *tmp)
 {
     char before[256];
     
@@ -19,18 +37,17 @@ static int setValue(std::string &val, char *tmp)
         if ((tmp = strtok(nullptr, "=")) == nullptr)
            val = std::string(before);
     }
-    return (SUCCESS);
 }
 
-int Variables::setKey(vServer &category, char *buf)
+void Variables::setKey(vServer &category, char *buf)
 {
     char cp[256];
 
     strcpy(cp, buf);
     char *tmp = strtok(cp, " \t");
 
-    if (tmp[0] == ';')
-        return (SUCCESS);
+    if (!tmp || tmp[0] == ';')
+        return;
     switch (djb2_hash(tmp))
     {
     case djb2_hash("Name"):
@@ -40,20 +57,20 @@ int Variables::setKey(vServer &category, char *buf)
     case djb2_hash("PeerPassword"):
         return setValue(category.mPeerPass, tmp);
     default:
-        return (SUCCESS);
+        return;
     }
-    return (SUCCESS);
+    return;
 }
 
-int Variables::setKey(vGlobal &category, char *buf)
+void Variables::setKey(vGlobal &category, char *buf)
 {
     char cp[256];
 
     strcpy(cp, buf);
     char *tmp = strtok(cp, " \t");
 
-    if (tmp[0] == ';')
-        return (SUCCESS);
+    if (!tmp || tmp[0] == ';')
+        return;
     switch (djb2_hash(tmp))
     {
     case djb2_hash("Name"):
@@ -65,7 +82,71 @@ int Variables::setKey(vGlobal &category, char *buf)
     case djb2_hash("Ports"):
         return setValue(category.mPort, tmp);
     default:
-        return (SUCCESS);
+        return;
     }
-    return (SUCCESS);
+    return;
+}
+
+void Variables::setKey(vSSL &category, char *buf)
+{
+    char cp[256];
+
+    strcpy(cp, buf);
+    char *tmp = strtok(cp, " \t");
+
+    if (!tmp || tmp[0] == ';')
+        return;
+    switch (djb2_hash(tmp))
+    {
+    case djb2_hash("CertFile"):
+        return setValue(category.mCertFile, tmp);
+    case djb2_hash("KeyFile"):
+        return setValue(category.mKeyFile, tmp);
+    case djb2_hash("Ports"):
+        return setValue(category.mPort, tmp);
+    default:
+        return;
+    }
+    return;
+}
+
+void Variables::setKey(vLimits &category, char *buf)
+{
+    char cp[256];
+
+    strcpy(cp, buf);
+    char *tmp = strtok(cp, " \t");
+
+    if (!tmp || tmp[0] == ';')
+        return;
+    switch (djb2_hash(tmp))
+    {
+    case djb2_hash("MaxNickLength"):
+        return setValue(category.mMaxNickLength, tmp);
+    default:
+        return;
+    }
+    return;
+}
+
+IClient *Variables::findLocalClientByName(const std::string &name)
+{
+    std::map<std::string, IClient *>::iterator it;
+
+    if ((it = mDirectUser.find(name)) != mDirectUser.end())
+        return it->second;
+    if ((it = mDirectServ.find(name)) != mDirectServ.end())
+        return it->second;
+    return nullptr;
+}
+
+IClient *Variables::findRemoteClientByName(const std::string &name)
+{
+    std::map<std::string, IClient *>::iterator it;
+
+    if ((it = mRemoteUser.find(name)) != mRemoteUser.end())
+        return it->second;
+    if ((it = mRemoteServ.find(name)) != mRemoteServ.end())
+        return it->second;
+    return nullptr;
 }

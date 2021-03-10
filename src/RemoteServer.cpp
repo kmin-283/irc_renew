@@ -1,9 +1,9 @@
 #include "RemoteServer.hpp"
 
-RemoteServer::RemoteServer(const int &sock)
+RemoteServer::RemoteServer(const int &clientId)
 {
     // tmp
-    mSock = sock;
+    mClientId = clientId;
     this->mServerName = "11";
     //
 }
